@@ -4,7 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
-export function SiteHeader({ authStatus }: { authStatus: ReactNode }) {
+export function SiteHeader({
+  authStatus,
+  themeSelector,
+}: {
+  authStatus: ReactNode;
+  themeSelector: ReactNode;
+}) {
   const pathname = usePathname();
   const isSetupRoute = ["/setup", "/input", "/import"].includes(pathname);
   const isAuthRoute = pathname === "/login" || pathname === "/register";
@@ -23,6 +29,7 @@ export function SiteHeader({ authStatus }: { authStatus: ReactNode }) {
               <Link href="/trade" aria-current={pathname === "/trade" ? "page" : undefined} className={`rounded-lg px-3 py-2 transition ${pathname === "/trade" ? "bg-teal-400 text-slate-950" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}>買賣</Link>
             </nav>
           )}
+          {themeSelector}
           {authStatus}
         </div>
       </div>
