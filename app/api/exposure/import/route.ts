@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+import { requireApiSession } from "@/lib/auth-api";
 import { connectToDatabase } from "@/lib/mongodb";
-import { ExposureRecordModel } from "@/model/ExposureRecord";
-import { PositionImportRecordModel } from "@/model/PositionImportRecord";
+import { ExposureRecordModel } from "@/models/ExposureRecord";
+import { PositionImportRecordModel } from "@/models/PositionImportRecord";
 
 type ImportRequest = {
   holdingShares?: unknown;
@@ -26,6 +27,9 @@ function getRiskLevel(exposureRatio: number): RiskLevel {
 }
 
 export async function POST(request: Request) {
+  const auth = await requireApiSession();
+  if (auth.response) return auth.response;
+
   let body: ImportRequest;
   try {
     body = await request.json();
@@ -67,6 +71,7 @@ export async function POST(request: Request) {
     let result: Record<string, unknown> | undefined;
     await session.withTransaction(async () => {
       const [record] = await ExposureRecordModel.create([{
+        userId: auth.user.id,
         source: "import",
         realizedProfitLoss: 0,
         investment: costBasis,
@@ -79,6 +84,7 @@ export async function POST(request: Request) {
       }], { session });
 
       const [importRecord] = await PositionImportRecordModel.create([{
+        userId: auth.user.id,
         exposureRecordId: record._id,
         symbol: "00631L",
         holdingShares,

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireApiSession } from "@/lib/auth-api";
 
 type ExposureRequest = { investment?: unknown; cash?: unknown };
 const LEVERAGE_MULTIPLIER = 2;
@@ -12,6 +13,9 @@ function getRiskLevel(exposureRatio: number) {
 }
 
 export async function POST(request: Request) {
+  const auth = await requireApiSession();
+  if (auth.response) return auth.response;
+
   let body: ExposureRequest;
   try {
     body = await request.json();

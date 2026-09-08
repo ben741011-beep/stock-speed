@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
+import { requireApiSession } from "@/lib/auth-api";
 import { getPositionAccounting } from "@/lib/positionAccounting";
 import { calculateNetMarketValue } from "@/lib/trading";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getTwseQuote } from "@/lib/twseQuote";
-import { ExposureRecordModel } from "@/model/ExposureRecord";
+import { ExposureRecordModel } from "@/models/ExposureRecord";
 
 export async function GET(request: Request) {
+  const auth = await requireApiSession();
+  if (auth.response) return auth.response;
+
   const symbol = new URL(request.url).searchParams.get("symbol")?.toUpperCase() || "00631L";
 
   try {
@@ -13,10 +17,10 @@ export async function GET(request: Request) {
       getTwseQuote(symbol),
       connectToDatabase(),
     ]);
-    const record = await ExposureRecordModel.findOne().sort({ updatedAt: -1 });
+    const record = await ExposureRecordModel.findOne({ userId: auth.user.id }).sort({ updatedAt: -1 });
     if (!record) return NextResponse.json({ error: "請先完成起始資金設定。" }, { status: 404 });
 
-    const accounting = await getPositionAccounting(record);
+    const accounting = await getPositionAccounting(record, auth.user.id);
     const valuation = calculateNetMarketValue(accounting.holdingShares * quote.price);
     const actualPortfolioValue = valuation.netMarketValue + accounting.cash;
     const unrealizedProfitLoss = valuation.netMarketValue - accounting.costBasis;

@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { requireApiSession } from "@/lib/auth-api";
 import { getPositionAccounting } from "@/lib/positionAccounting";
 import { calculateBrokerFee, calculateEtfSellTax } from "@/lib/trading";
 import { connectToDatabase } from "@/lib/mongodb";
-import { ExposureRecordModel } from "@/model/ExposureRecord";
-import { TradeRecordModel } from "@/model/TradeRecord";
+import { ExposureRecordModel } from "@/models/ExposureRecord";
+import { TradeRecordModel } from "@/models/TradeRecord";
 
 type TradeSide = "buy" | "sell";
 type TradeRequest = { side?: unknown; shares?: unknown; price?: unknown };
@@ -22,11 +23,14 @@ function getRiskLevel(ratio: number): RiskLevel {
 }
 
 export async function GET(request: Request) {
+  const auth = await requireApiSession();
+  if (auth.response) return auth.response;
+
   try {
     await connectToDatabase();
     const requestedLimit = Number(new URL(request.url).searchParams.get("limit") ?? 50);
     const limit = Number.isInteger(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 100) : 50;
-    const records = await TradeRecordModel.find().sort({ createdAt: -1 }).limit(limit).lean();
+    const records = await TradeRecordModel.find({ userId: auth.user.id }).sort({ createdAt: -1 }).limit(limit).lean();
     return NextResponse.json({ records, count: records.length });
   } catch (error) {
     console.error("Failed to read trade records", error);
@@ -35,6 +39,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const auth = await requireApiSession();
+  if (auth.response) return auth.response;
+
   let body: TradeRequest;
   try { body = await request.json(); } catch { return NextResponse.json({ error: "請提供有效的 JSON 資料。" }, { status: 400 }); }
 
@@ -49,10 +56,10 @@ export async function POST(request: Request) {
   try {
     let result: Record<string, unknown> | undefined;
     await session.withTransaction(async () => {
-      const record = await ExposureRecordModel.findOne().sort({ updatedAt: -1 }).session(session);
+      const record = await ExposureRecordModel.findOne({ userId: auth.user.id }).sort({ updatedAt: -1 }).session(session);
       if (!record) throw new TradeError("請先完成起始資金設定。");
 
-      const accounting = await getPositionAccounting(record, session);
+      const accounting = await getPositionAccounting(record, auth.user.id, session);
       const amount = shares * price;
       const fee = calculateBrokerFee(amount);
       const tax = side === "sell" ? calculateEtfSellTax(amount) : 0;
@@ -82,8 +89,8 @@ export async function POST(request: Request) {
       const exposureRatio = portfolioValue > 0 ? (exposureNotional / portfolioValue) * 100 : 0;
       const level = getRiskLevel(exposureRatio);
 
-      const updated = await ExposureRecordModel.findByIdAndUpdate(
-        record.id,
+      const updated = await ExposureRecordModel.findOneAndUpdate(
+        { _id: record._id, userId: auth.user.id },
         {
           investment,
           realizedProfitLoss,
@@ -99,6 +106,7 @@ export async function POST(request: Request) {
       );
 
       const [tradeRecord] = await TradeRecordModel.create([{
+        userId: auth.user.id,
         exposureRecordId: record._id,
         side,
         shares,

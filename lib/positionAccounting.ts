@@ -1,8 +1,8 @@
 import type { ClientSession, Types } from "mongoose";
 import { getHoldingShares } from "@/lib/exposure";
 import { calculateBrokerFee, calculateEtfSellTax } from "@/lib/trading";
-import { PositionImportRecordModel } from "@/model/PositionImportRecord";
-import { TradeRecordModel } from "@/model/TradeRecord";
+import { PositionImportRecordModel } from "@/models/PositionImportRecord";
+import { TradeRecordModel } from "@/models/TradeRecord";
 
 type AccountingRecord = {
   _id: Types.ObjectId;
@@ -19,6 +19,7 @@ type AccountingRecord = {
 
 export async function getPositionAccounting(
   record: AccountingRecord,
+  userId: string,
   session?: ClientSession,
 ) {
   if (record.source !== "import") {
@@ -34,6 +35,7 @@ export async function getPositionAccounting(
   }
 
   const importQuery = PositionImportRecordModel.findOne({
+    userId,
     exposureRecordId: record._id,
   }).sort({ createdAt: -1 });
   if (session) importQuery.session(session);
@@ -52,6 +54,7 @@ export async function getPositionAccounting(
   }
 
   const tradeQuery = TradeRecordModel.find({
+    userId,
     exposureRecordId: record._id,
   }).sort({ createdAt: 1, _id: 1 });
   if (session) tradeQuery.session(session);
