@@ -32,8 +32,8 @@ function Gauge({ ratio }: { ratio: number }) {
   const labels = Array.from({ length: 11 }, (_, index) => index * 20);
 
   return (
-    <div className="mx-auto w-full max-w-md">
-      <svg viewBox="0 0 320 320" className="w-full" role="img" aria-label={`暴險比例 ${ratio.toFixed(1)}%`}>
+    <div className="mx-auto min-w-0 w-full max-w-md">
+      <svg viewBox="0 0 320 320" className="block h-auto w-full max-w-full" role="img" aria-label={`暴險比例 ${ratio.toFixed(1)}%`}>
         <defs><filter id="shadow"><feDropShadow dx="0" dy="3" stdDeviation="3" floodOpacity=".3" /></filter></defs>
         <circle cx="160" cy="160" r="150" fill="#020617" stroke="#334155" strokeWidth="2" />
         <circle cx="160" cy="160" r="137" fill="#050505" stroke="#0f172a" strokeWidth="3" />
@@ -121,9 +121,9 @@ export default async function Home() {
   return (
     <main className="relative overflow-hidden px-5 py-12 sm:px-8 lg:py-16">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_17%_15%,rgba(20,184,166,.16),transparent_29%),radial-gradient(circle_at_84%_70%,rgba(249,115,22,.13),transparent_31%)]" />
-        <div className="relative mx-auto grid max-w-5xl gap-8">
-        <section className="mx-auto w-full max-w-3xl rounded-3xl border border-white/10 bg-slate-900/60 p-5 shadow-2xl shadow-black/20 backdrop-blur sm:p-8">
-          <div className="flex items-start justify-between gap-4"><div><p className="text-sm font-bold tracking-[.18em] text-teal-300">LIVE DASHBOARD</p><h1 className="mt-2 text-3xl font-bold tracking-tight text-white">最新實質台股暴險</h1><p className="mt-2 text-sm text-slate-400">數值直接取自 MongoDB 最新紀錄後重新計算。</p></div><span className={`rounded-full px-3 py-1.5 text-sm font-bold ring-1 ${color[level]}`}>{level}</span></div>
+        <div className="relative mx-auto grid w-full min-w-0 max-w-5xl grid-cols-[minmax(0,1fr)] gap-8">
+        <section className="mx-auto min-w-0 w-full max-w-3xl rounded-3xl border border-white/10 bg-slate-900/60 p-5 shadow-2xl shadow-black/20 backdrop-blur sm:p-8">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between"><div><p className="text-sm font-bold tracking-[.18em] text-teal-300">LIVE DASHBOARD</p><h1 className="mt-2 text-3xl font-bold tracking-tight text-white">最新實質台股暴險</h1><p className="mt-2 text-sm text-slate-400">數值直接取自 MongoDB 最新紀錄後重新計算。</p></div><span className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-bold ring-1 ${color[level]}`}>{level}</span></div>
           {error ? <p className="mt-8 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</p> : portfolioValue === 0 ? <p className="mt-8 rounded-xl bg-slate-950/70 px-4 py-3 text-sm text-slate-300">尚無資料，請先前往「起始設定」選擇適合你的設定方式。</p> : <><Gauge ratio={exposureRatio} /><div className="mt-5 grid gap-3 sm:grid-cols-2"><div className="rounded-2xl border border-white/8 bg-slate-950/60 p-4"><p className="text-xs font-bold tracking-wider text-slate-500">實質曝險金額</p><p className="mt-2 text-xl font-bold">NT$ {money.format(exposureNotional)}</p></div><div className="rounded-2xl border border-teal-400/15 bg-teal-400/5 p-4"><p className="text-xs font-bold tracking-wider text-teal-300/70">券商帳面價值</p><p className="mt-2 text-xl font-bold">NT$ {money.format(actualStockValue)}</p><p className="mt-1 text-[11px] text-slate-500">{stockValueDescription}</p></div><div className="rounded-2xl border border-sky-400/15 bg-sky-400/5 p-4"><p className="text-xs font-bold tracking-wider text-sky-300/70">目前可用現金</p><p className="mt-2 text-xl font-bold">NT$ {money.format(cash)}</p></div><div className="rounded-2xl border border-amber-400/15 bg-amber-400/5 p-4"><p className="text-xs font-bold tracking-wider text-amber-300/70">目前持股成本</p><p className="mt-2 text-xl font-bold">NT$ {money.format(investment)}</p><p className="mt-1 text-[11px] text-slate-500">歷次買入金額＋買入手續費</p></div><div className={`rounded-2xl border p-4 ${profitLossTone}`}><p className="text-xs font-bold tracking-wider opacity-70">目前總損益</p><p className="mt-2 text-xl font-bold">{signedMoney(totalProfitLoss)}</p><p className="mt-1 text-[11px] opacity-70">已實現 {signedMoney(realizedProfitLoss)}・未實現 {signedMoney(unrealizedProfitLoss)}</p><p className="mt-1 text-[11px] opacity-70">未實現損益＝券商帳面價值－持股成本</p><p className="mt-1 text-[11px] opacity-70">持股報酬率 {signedPercent(profitLossRate)}・成本 NT$ {money.format(investment)}</p></div></div></>}
         </section>
         <MonthlyIndexStats />

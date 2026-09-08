@@ -41,7 +41,7 @@ export function MonthlyIndexStats() {
   );
 
   return (
-    <section aria-labelledby="monthly-index-title" className="rounded-3xl border border-white/10 bg-slate-900/60 p-5 shadow-2xl shadow-black/20 backdrop-blur sm:p-8">
+    <section aria-labelledby="monthly-index-title" className="min-w-0 rounded-3xl border border-white/10 bg-slate-900/60 p-5 shadow-2xl shadow-black/20 backdrop-blur sm:p-8">
       <div className="max-w-2xl">
         <p className="text-xs font-bold tracking-[0.18em] text-teal-300">SEASONAL SNAPSHOT</p>
         <h2 id="monthly-index-title" className="mt-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">加權指數各月份漲跌統計</h2>
@@ -66,8 +66,8 @@ export function MonthlyIndexStats() {
         </div>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/55">
-        <div className="overflow-x-auto">
+      <div className="mt-6 min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/55">
+        <div className="min-w-0 overflow-x-auto">
           <table className="w-full min-w-[760px] border-collapse text-left text-sm">
             <caption className="sr-only">加權指數 1 月至 12 月的上漲與下跌統計</caption>
             <thead className="border-b border-white/10 bg-white/[0.03] text-xs font-bold tracking-wider text-slate-400">
