@@ -2,36 +2,20 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
+import { CashCalculator } from "@/components/CashCalculator";
 
 const TAIPEI_TODAY = new Intl.DateTimeFormat("sv-SE", {
   timeZone: "Asia/Taipei",
 }).format(new Date());
 
-const money = new Intl.NumberFormat("zh-TW", {
-  style: "currency",
-  currency: "TWD",
-  maximumFractionDigits: 0,
-});
-
-function signedMoney(value: number) {
-  const sign = value > 0 ? "+" : value < 0 ? "−" : "";
-  return `${sign}${money.format(Math.abs(value))}`;
-}
-
 export default function ImportPositionPage() {
   const [holdingShares, setHoldingShares] = useState("");
   const [costBasis, setCostBasis] = useState("");
-  const [bookValue, setBookValue] = useState("");
   const [cash, setCash] = useState("");
+  const [calculatorOpen, setCalculatorOpen] = useState(false);
   const [asOfDate, setAsOfDate] = useState(TAIPEI_TODAY);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
-
-  const cost = Number(costBasis);
-  const value = Number(bookValue);
-  const hasValuation = costBasis !== "" && bookValue !== "" && cost > 0 && Number.isFinite(value);
-  const calculatedProfitLoss = hasValuation ? value - cost : null;
-  const calculatedRate = hasValuation ? ((value - cost) / cost) * 100 : null;
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -45,7 +29,6 @@ export default function ImportPositionPage() {
         body: JSON.stringify({
           holdingShares: Number(holdingShares),
           costBasis: Number(costBasis),
-          bookValue: Number(bookValue),
           cash: Number(cash),
           asOfDate,
         }),
@@ -103,25 +86,41 @@ export default function ImportPositionPage() {
               <span id="date-help" className="mt-1 block text-xs text-slate-500">點擊欄位後從日曆選擇，不能輸入未來日期。</span>
             </label>
             <MoneyInput label="目前持股成本" value={costBasis} onChange={setCostBasis} />
-            <MoneyInput label="目前帳面價值" value={bookValue} onChange={setBookValue} />
-            <MoneyInput label="目前可用現金" value={cash} onChange={setCash} />
+            <div className="sm:col-span-2">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <label htmlFor="available-cash" className="text-sm font-semibold text-slate-200">目前可用現金</label>
+                <button
+                  type="button"
+                  aria-expanded={calculatorOpen}
+                  aria-controls="cash-calculator"
+                  onClick={() => setCalculatorOpen((open) => !open)}
+                  className="rounded-lg border border-violet-300/25 bg-violet-400/10 px-3 py-1.5 text-xs font-bold text-violet-200 transition hover:bg-violet-400/20"
+                >
+                  {calculatorOpen ? "收起計算機" : "開啟計算機"}
+                </button>
+              </div>
+              <div className="flex items-center rounded-2xl border border-slate-700 bg-slate-950 px-4 focus-within:border-violet-400">
+                <span className="text-slate-500">NT$</span>
+                <input id="available-cash" required type="number" min="0" step="any" value={cash} onChange={(event) => setCash(event.target.value)} className="w-full bg-transparent px-3 py-4 text-lg font-semibold outline-none" />
+              </div>
+              {calculatorOpen ? (
+                <div id="cash-calculator">
+                  <CashCalculator
+                    initialValue={cash}
+                    onApply={(value) => {
+                      setCash(value);
+                      setCalculatorOpen(false);
+                    }}
+                  />
+                </div>
+              ) : null}
+            </div>
           </div>
 
           <div className="rounded-2xl border border-violet-400/20 bg-violet-400/10 p-5">
-            <p className="text-xs font-bold tracking-wider text-violet-200/70">目前持股損益率</p>
-            {calculatedRate === null || calculatedProfitLoss === null ? (
-              <p className="mt-2 text-xl font-bold text-white">請輸入目前持股成本與目前帳面價值</p>
-            ) : (
-              <>
-                <p className="mt-2 text-2xl font-bold text-white">
-                  {calculatedRate >= 0 ? "+" : ""}{calculatedRate.toFixed(2)}%
-                </p>
-                <p className="mt-1 text-sm text-violet-100/80">目前帳面損益 {signedMoney(calculatedProfitLoss)}</p>
-              </>
-            )}
-            <p className="mt-2 text-xs leading-5 text-slate-400">
-              系統依「（目前帳面價值 − 目前持股成本）÷ 目前持股成本」自動計算。
-            </p>
+            <p className="text-xs font-bold tracking-wider text-violet-200/70">市值與損益</p>
+            <p className="mt-2 text-base font-bold text-white">匯入後將依最近交易日收盤價自動計算</p>
+            <p className="mt-2 text-xs leading-5 text-slate-400">不需要手動輸入帳面價值，儀表板會使用 00631L 最近收盤價更新持股市值與損益。</p>
           </div>
 
           {status && (

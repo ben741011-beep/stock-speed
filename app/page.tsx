@@ -59,8 +59,6 @@ export default async function Home() {
   let marketPrice: number | null = null;
   let quoteDate: string | null = null;
   let quoteTime: string | null = null;
-  let importedBookValue: number | null = null;
-  let importedAsOfDate: Date | null = null;
 
   try {
     await connectToDatabase();
@@ -71,16 +69,12 @@ export default async function Home() {
       cash = accounting.cash;
       holdingShares = accounting.holdingShares;
       realizedProfitLoss = accounting.realizedProfitLoss;
-      importedBookValue = accounting.tradeCount === 0
-        ? accounting.importedBookValue
-        : null;
-      importedAsOfDate = accounting.importedAsOfDate;
     }
   } catch {
     error = "目前無法讀取 MongoDB 資料，請稍後再試。";
   }
 
-  if (!error && holdingShares > 0 && importedBookValue === null) {
+  if (!error && holdingShares > 0) {
     try {
       const quote = await getTwseQuote("00631L");
       marketPrice = quote.price;
@@ -94,16 +88,11 @@ export default async function Home() {
   const valuation = calculateNetMarketValue(
     marketPrice === null ? 0 : holdingShares * marketPrice,
   );
-  const actualStockValue = importedBookValue ?? valuation.netMarketValue;
-  const importedDateLabel = importedAsOfDate?.toLocaleDateString("zh-TW", {
-    timeZone: "Asia/Taipei",
-  });
+  const actualStockValue = valuation.netMarketValue;
   const estimatedSellingCosts = valuation.estimatedSellFee + valuation.estimatedSellTax;
-  const stockValueDescription = importedBookValue !== null
-    ? holdingShares.toLocaleString("zh-TW") + " 股・匯入券商帳面價值" + (importedDateLabel ? "・基準 " + importedDateLabel : "")
-    : marketPrice === null
-      ? "尚無持股"
-      : holdingShares.toLocaleString("zh-TW") + " 股 × NT" + "$" + " " + marketPrice.toFixed(2) + "，扣除預估賣出費用 NT" + "$" + " " + money.format(estimatedSellingCosts) + (quoteDate ? "・收盤價 " + quoteDate + (quoteTime ? " " + quoteTime : "") : "");
+  const stockValueDescription = marketPrice === null
+    ? "尚無持股"
+    : holdingShares.toLocaleString("zh-TW") + " 股 × NT" + "$" + " " + marketPrice.toFixed(2) + "，扣除預估賣出費用 NT" + "$" + " " + money.format(estimatedSellingCosts) + (quoteDate ? "・收盤價 " + quoteDate + (quoteTime ? " " + quoteTime : "") : "");
   const unrealizedProfitLoss = holdingShares > 0 ? actualStockValue - investment : 0;
   const totalProfitLoss = realizedProfitLoss + unrealizedProfitLoss;
   const profitLossRate = investment > 0 ? (unrealizedProfitLoss / investment) * 100 : 0;
@@ -124,7 +113,7 @@ export default async function Home() {
         <div className="relative mx-auto grid w-full min-w-0 max-w-5xl grid-cols-[minmax(0,1fr)] gap-8">
         <section className="mx-auto min-w-0 w-full max-w-3xl rounded-3xl border border-white/10 bg-slate-900/60 p-5 shadow-2xl shadow-black/20 backdrop-blur sm:p-8">
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between"><div><p className="text-sm font-bold tracking-[.18em] text-teal-300">LIVE DASHBOARD</p><h1 className="mt-2 text-3xl font-bold tracking-tight text-white">最新實質台股暴險</h1><p className="mt-2 text-sm text-slate-400">數值直接取自 MongoDB 最新紀錄後重新計算。</p></div><span className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-bold ring-1 ${color[level]}`}>{level}</span></div>
-          {error ? <p className="mt-8 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</p> : portfolioValue === 0 ? <p className="mt-8 rounded-xl bg-slate-950/70 px-4 py-3 text-sm text-slate-300">尚無資料，請先前往「起始設定」選擇適合你的設定方式。</p> : <><Gauge ratio={exposureRatio} /><div className="mt-5 grid gap-3 sm:grid-cols-2"><div className="rounded-2xl border border-white/8 bg-slate-950/60 p-4"><p className="text-xs font-bold tracking-wider text-slate-500">實質曝險金額</p><p className="mt-2 text-xl font-bold">NT$ {money.format(exposureNotional)}</p></div><div className="rounded-2xl border border-teal-400/15 bg-teal-400/5 p-4"><p className="text-xs font-bold tracking-wider text-teal-300/70">券商帳面價值</p><p className="mt-2 text-xl font-bold">NT$ {money.format(actualStockValue)}</p><p className="mt-1 text-[11px] text-slate-500">{stockValueDescription}</p></div><div className="rounded-2xl border border-sky-400/15 bg-sky-400/5 p-4"><p className="text-xs font-bold tracking-wider text-sky-300/70">目前可用現金</p><p className="mt-2 text-xl font-bold">NT$ {money.format(cash)}</p></div><div className="rounded-2xl border border-amber-400/15 bg-amber-400/5 p-4"><p className="text-xs font-bold tracking-wider text-amber-300/70">目前持股成本</p><p className="mt-2 text-xl font-bold">NT$ {money.format(investment)}</p><p className="mt-1 text-[11px] text-slate-500">歷次買入金額＋買入手續費</p></div><div className={`rounded-2xl border p-4 ${profitLossTone}`}><p className="text-xs font-bold tracking-wider opacity-70">目前總損益</p><p className="mt-2 text-xl font-bold">{signedMoney(totalProfitLoss)}</p><p className="mt-1 text-[11px] opacity-70">已實現 {signedMoney(realizedProfitLoss)}・未實現 {signedMoney(unrealizedProfitLoss)}</p><p className="mt-1 text-[11px] opacity-70">未實現損益＝券商帳面價值－持股成本</p><p className="mt-1 text-[11px] opacity-70">持股報酬率 {signedPercent(profitLossRate)}・成本 NT$ {money.format(investment)}</p></div></div></>}
+          {error ? <p className="mt-8 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</p> : portfolioValue === 0 ? <p className="mt-8 rounded-xl bg-slate-950/70 px-4 py-3 text-sm text-slate-300">尚無資料，請先前往「起始設定」選擇適合你的設定方式。</p> : <><Gauge ratio={exposureRatio} /><div className="mt-5 grid gap-3 sm:grid-cols-2"><div className="rounded-2xl border border-white/8 bg-slate-950/60 p-4"><p className="text-xs font-bold tracking-wider text-slate-500">實質曝險金額</p><p className="mt-2 text-xl font-bold">NT$ {money.format(exposureNotional)}</p></div><div className="rounded-2xl border border-teal-400/15 bg-teal-400/5 p-4"><p className="text-xs font-bold tracking-wider text-teal-300/70">目前持股市值</p><p className="mt-2 text-xl font-bold">NT$ {money.format(actualStockValue)}</p><p className="mt-1 text-[11px] text-slate-500">{stockValueDescription}</p></div><div className="rounded-2xl border border-sky-400/15 bg-sky-400/5 p-4"><p className="text-xs font-bold tracking-wider text-sky-300/70">目前可用現金</p><p className="mt-2 text-xl font-bold">NT$ {money.format(cash)}</p></div><div className="rounded-2xl border border-amber-400/15 bg-amber-400/5 p-4"><p className="text-xs font-bold tracking-wider text-amber-300/70">目前持股成本</p><p className="mt-2 text-xl font-bold">NT$ {money.format(investment)}</p><p className="mt-1 text-[11px] text-slate-500">歷次買入金額＋買入手續費</p></div><div className={`rounded-2xl border p-4 ${profitLossTone}`}><p className="text-xs font-bold tracking-wider opacity-70">目前總損益</p><p className="mt-2 text-xl font-bold">{signedMoney(totalProfitLoss)}</p><p className="mt-1 text-[11px] opacity-70">已實現 {signedMoney(realizedProfitLoss)}・未實現 {signedMoney(unrealizedProfitLoss)}</p><p className="mt-1 text-[11px] opacity-70">未實現損益＝目前持股市值－持股成本</p><p className="mt-1 text-[11px] opacity-70">持股報酬率 {signedPercent(profitLossRate)}・成本 NT$ {money.format(investment)}</p></div></div></>}
         </section>
         <MonthlyIndexStats />
         </div>

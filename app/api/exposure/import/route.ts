@@ -7,7 +7,6 @@ import { PositionImportRecordModel } from "@/models/PositionImportRecord";
 type ImportRequest = {
   holdingShares?: unknown;
   costBasis?: unknown;
-  bookValue?: unknown;
   cash?: unknown;
   asOfDate?: unknown;
 };
@@ -39,17 +38,16 @@ export async function POST(request: Request) {
 
   const holdingShares = Number(body.holdingShares);
   const costBasis = Number(body.costBasis);
-  const bookValue = Number(body.bookValue);
   const cash = Number(body.cash);
   const asOfDateText = String(body.asOfDate ?? "");
   const asOfDate = new Date(asOfDateText);
 
-  const values = [holdingShares, costBasis, bookValue, cash];
+  const values = [holdingShares, costBasis, cash];
   if (values.some((value) => !Number.isFinite(value))) {
     return NextResponse.json({ error: "請完整填寫有效的數字資料。" }, { status: 400 });
   }
-  if (holdingShares <= 0 || costBasis <= 0 || bookValue < 0 || cash < 0) {
-    return NextResponse.json({ error: "股數與目前持股成本必須大於 0，目前帳面價值與現金不得小於 0。" }, { status: 400 });
+  if (holdingShares <= 0 || costBasis <= 0 || cash < 0) {
+    return NextResponse.json({ error: "股數與目前持股成本必須大於 0，現金不得小於 0。" }, { status: 400 });
   }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(asOfDateText) || Number.isNaN(asOfDate.getTime())) {
     return NextResponse.json({ error: "請從日期選擇器選擇有效的資料基準日期。" }, { status: 400 });
@@ -58,10 +56,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "資料基準日期不能晚於今天。" }, { status: 400 });
   }
 
-  const calculatedProfitLoss = bookValue - costBasis;
-  const calculatedProfitLossRate = (calculatedProfitLoss / costBasis) * 100;
-  const portfolioValue = bookValue + cash;
-  const exposureNotional = bookValue * 2;
+  const portfolioValue = costBasis + cash;
+  const exposureNotional = costBasis * 2;
   const exposureRatio = portfolioValue > 0 ? (exposureNotional / portfolioValue) * 100 : 0;
   const level = getRiskLevel(exposureRatio);
 
@@ -89,9 +85,7 @@ export async function POST(request: Request) {
         symbol: "00631L",
         holdingShares,
         costBasis,
-        bookValue,
         cash,
-        calculatedProfitLossRate,
         asOfDate,
       }], { session });
 
@@ -100,12 +94,9 @@ export async function POST(request: Request) {
         importRecordId: importRecord.id,
         holdingShares,
         costBasis,
-        bookValue,
         cash,
-        calculatedProfitLoss,
-        calculatedProfitLossRate,
         asOfDate: asOfDateText,
-        message: "既有持股已匯入，持股成本、帳面價值與自動計算的損益率已保存。",
+        message: "既有持股已匯入，持股市值與損益將依最近交易日收盤價自動計算。",
       };
     });
 

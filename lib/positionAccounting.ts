@@ -91,7 +91,7 @@ export async function getPositionAccounting(
     cash,
     holdingShares,
     realizedProfitLoss,
-    importedBookValue: importedPosition.bookValue,
+    importedBookValue: null,
     importedAsOfDate: importedPosition.asOfDate,
     tradeCount: trades.length,
   };

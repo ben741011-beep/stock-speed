@@ -12,9 +12,9 @@ const positionImportRecordSchema = new Schema(
     symbol: { type: String, required: true, default: "00631L" },
     holdingShares: { type: Number, required: true, min: 0 },
     costBasis: { type: Number, required: true, min: 0 },
-    bookValue: { type: Number, required: true, min: 0 },
+    bookValue: { type: Number, min: 0 },
     cash: { type: Number, required: true, min: 0 },
-    calculatedProfitLossRate: { type: Number, required: true },
+    calculatedProfitLossRate: { type: Number },
     asOfDate: { type: Date, required: true },
   },
   { timestamps: true, collection: POSITION_IMPORT_RECORD_COLLECTION },
@@ -28,7 +28,7 @@ const nonnegative = { ...numeric, minimum: 0 };
 export const POSITION_IMPORT_RECORD_VALIDATOR = {
   $jsonSchema: {
     bsonType: "object",
-    required: ["userId", "exposureRecordId", "symbol", "holdingShares", "costBasis", "bookValue", "cash", "calculatedProfitLossRate", "asOfDate", "createdAt", "updatedAt"],
+    required: ["userId", "exposureRecordId", "symbol", "holdingShares", "costBasis", "cash", "asOfDate", "createdAt", "updatedAt"],
     additionalProperties: false,
     properties: {
       _id: { bsonType: "objectId" },
