@@ -20,8 +20,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "00631L 暴險時速表",
-  description: "00631L 投資組合實質暴險計算工具",
+  title: {
+    default: "00631L 曝險控制台",
+    template: "%s｜00631L 曝險控制台",
+  },
+  description: "整合 00631L 持股、現金與交易費稅，一眼掌握名目曝險、持股成本與整體損益。",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {

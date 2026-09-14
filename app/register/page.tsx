@@ -1,10 +1,10 @@
 import { AuthForm } from "@/components/AuthForm";
-import { getCurrentUser } from "@/lib/auth";
+import { readSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 
 export default async function RegisterPage() {
-  const user = await getCurrentUser();
-  if (user) redirect("/");
+  const session = await readSession();
+  if (session) redirect("/dashboard");
 
   return (
     <main className="relative grid min-h-[calc(100vh-8rem)] place-items-center overflow-hidden bg-slate-950 px-5 py-12 text-slate-100">

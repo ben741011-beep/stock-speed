@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { getCurrentUser } from "@/lib/auth";
 import { LogoutButton } from "@/components/LogoutButton";
+import { readSession } from "@/lib/session";
 
 export async function AuthStatus() {
-  const user = await getCurrentUser();
+  const session = await readSession();
 
-  if (!user) {
+  if (!session) {
     return (
       <div className="flex items-center gap-1 text-sm font-semibold">
         <Link className="rounded-lg px-3 py-2 text-slate-300 hover:bg-white/10 hover:text-white" href="/login">
@@ -20,7 +20,9 @@ export async function AuthStatus() {
 
   return (
     <div className="flex items-center gap-2 text-sm">
-      <span className="hidden max-w-48 truncate text-slate-400 xl:block">{user.email}</span>
+      <Link className="hidden rounded-lg px-3 py-2 font-semibold text-slate-300 hover:bg-white/10 hover:text-white lg:block" href="/dashboard">
+        我的儀表板
+      </Link>
       <LogoutButton />
     </div>
   );

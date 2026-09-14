@@ -31,7 +31,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         throw new Error(data.error ?? `${isLogin ? "登入" : "註冊"}失敗。`);
       }
 
-      router.replace("/");
+      router.replace("/dashboard");
       router.refresh();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "目前無法完成操作，請稍後再試。");
