@@ -23,7 +23,11 @@ export async function connectToDatabase() {
     return cache.connection;
   }
 
-  cache.promise ??= mongoose.connect(MONGODB_URL, { bufferCommands: false });
+  cache.promise ??= mongoose.connect(MONGODB_URL, { bufferCommands: false }).catch((error) => {
+    cache.connection = null;
+    cache.promise = null;
+    throw error;
+  });
   cache.connection = await cache.promise;
   return cache.connection;
 }

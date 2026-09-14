@@ -38,7 +38,7 @@ function parsePrice(value?: string) {
   return Number.isFinite(price) && price > 0 ? price : null;
 }
 
-export async function getTwseQuote(symbol = "00631L") {
+export async function fetchLatestTwseClosingPrice(symbol = "00631L") {
   if (!/^[0-9A-Z]{4,10}$/.test(symbol)) throw new Error("股票代碼格式不正確。");
   const { year, month, queryDate, isoDate } = getTaipeiDate();
 
@@ -86,8 +86,6 @@ export async function getTwseQuote(symbol = "00631L") {
     symbol,
     name,
     price: latest.price,
-    priceSource: "latestClose",
     quoteDate: latest.date,
-    quoteTime: "13:30:00",
   } as const;
 }
