@@ -29,6 +29,27 @@ const authUserSchema = new Schema(
 
 authUserSchema.index({ email: 1 }, { unique: true, name: "email_1" });
 
+export const AUTH_USER_VALIDATOR = {
+  $jsonSchema: {
+    bsonType: "object",
+    required: ["email", "passwordHash", "createdAt", "updatedAt"],
+    additionalProperties: false,
+    properties: {
+      _id: { bsonType: "objectId" },
+      email: {
+        bsonType: "string",
+        minLength: 3,
+        maxLength: 320,
+        pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+      },
+      passwordHash: { bsonType: "string", minLength: 60, maxLength: 255 },
+      createdAt: { bsonType: "date" },
+      updatedAt: { bsonType: "date" },
+      __v: { bsonType: "int" },
+    },
+  },
+};
+
 export type AuthUser = InferSchemaType<typeof authUserSchema>;
 
 export type AuthCredentials = {
