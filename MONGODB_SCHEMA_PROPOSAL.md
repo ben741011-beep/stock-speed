@@ -1,6 +1,6 @@
 # 00631L 盤中價格快照提案
 
-狀態：程式碼已準備；資料庫 schema 尚未建立，尚未寫入任何盤中價格。
+狀態：2026-09-18 已建立並查回驗證資料庫 schema；尚未寫入任何盤中價格。
 
 ## 唯讀盤點（2026-09-18）
 
@@ -36,8 +36,10 @@
   createdAt: ISODate("2026-09-18T04:04:50Z"), updatedAt: ISODate("2026-09-18T04:06:00Z") }
 ```
 
-## 待核准的精確資料庫變更
+## 已核准並完成的資料庫變更
 
-只在 `stock-speed` 建立 `stockIntradayPrices`，使用 `models/StockIntradayPrice.ts` 的 `STOCK_INTRADAY_PRICE_VALIDATOR` 作為完整 validator，並設定 `validationLevel: "strict"`、`validationAction: "error"`；建立 `{ stockCode: 1 }`、`unique: true`、名稱 `stockCode_1` 的索引。預期新增 1 個 collection、2 個索引（含自動 `_id_`），新增、更新或刪除文件都是 0。既有 `stockClosingPrices` 不修改。執行前再次唯讀比對目標 collection 是否仍不存在、既有 collection 的 validator、設定、索引、筆數及樣本；若有漂移立即停止。
+已在 `stock-speed` 建立 `stockIntradayPrices`，使用 `models/StockIntradayPrice.ts` 的 `STOCK_INTRADAY_PRICE_VALIDATOR` 作為完整 validator，並設定 `validationLevel: "strict"`、`validationAction: "error"`；建立 `{ stockCode: 1 }`、`unique: true`、名稱 `stockCode_1` 的索引。執行前重新唯讀比對，目標 collection 不存在，既有 `stockClosingPrices` 的 validator、設定、完整索引、筆數與樣本均符合原盤點。
 
-建立後唯讀查回 collection 設定、完整索引與筆數。首次真正的盤中價格寫入由使用者之後在交易日點擊按鈕觸發；會以 `stockCode: "00631L"` 取得或更新至多一筆，並由 model 用 `_id` 查回。若初次寫入失敗，先查明實際持久化結果，再決定是否重試。日後如需回復，先停止新 API 使用並檢查盤中快照；不自動刪除 collection 或文件。
+建立後唯讀查回：新 collection 的 validator 與 model 完全相符，`validationLevel: strict`、`validationAction: error`，索引為 `_id_` 與唯一的 `stockCode_1`；新 collection 為 **0 筆**，既有 `stockClosingPrices` 仍為 **1 筆**。本次新增、更新、刪除的價格文件皆為 **0 筆**，既有 collection 未修改。
+
+首次真正的盤中價格寫入由使用者之後在交易日點擊按鈕觸發；會以 `stockCode: "00631L"` 取得或更新至多一筆，並由 model 用 `_id` 查回。若初次寫入失敗，先查明實際持久化結果，再決定是否重試。日後如需回復，先停止新 API 使用並檢查盤中快照；不自動刪除 collection 或文件。
