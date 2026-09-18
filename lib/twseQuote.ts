@@ -4,6 +4,18 @@ type TwseStockDayResponse = {
   data?: string[][];
 };
 
+type TwseRealtimeResponse = {
+  rtcode?: string;
+  msgArray?: Array<{
+    c?: string;
+    d?: string;
+    t?: string;
+    z?: string;
+    n?: string;
+    trade?: { z?: string; t?: string };
+  }>;
+};
+
 function getTaipeiDate() {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: "Asia/Taipei",
@@ -88,4 +100,37 @@ export async function fetchLatestTwseClosingPrice(symbol = "00631L") {
     price: latest.price,
     quoteDate: latest.date,
   } as const;
+}
+
+export async function fetchTwseIntradayPrice(symbol = "00631L") {
+  if (!/^[0-9A-Z]{4,10}$/.test(symbol)) throw new Error("股票代碼格式不正確。");
+  const { isoDate } = getTaipeiDate();
+  const endpoint = new URL("https://mis.twse.com.tw/stock/api/getStockInfo.jsp");
+  endpoint.searchParams.set("ex_ch", `tse_${symbol}.tw`);
+  endpoint.searchParams.set("json", "1");
+  endpoint.searchParams.set("delay", "0");
+  endpoint.searchParams.set("_", String(Date.now()));
+
+  const response = await fetch(endpoint, {
+    cache: "no-store",
+    headers: { Accept: "application/json", Referer: "https://mis.twse.com.tw/stock/index.jsp" },
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!response.ok) throw new Error(`證交所盤中報價服務回傳 ${response.status}。`);
+  const data = await response.json() as TwseRealtimeResponse;
+  const quote = data.msgArray?.find((item) => item.c === symbol);
+  if (data.rtcode !== "0000" || !quote) throw new Error("證交所未回傳此股票的盤中報價。");
+
+  const quoteDate = /^\d{8}$/.test(quote.d ?? "")
+    ? `${quote.d!.slice(0, 4)}-${quote.d!.slice(4, 6)}-${quote.d!.slice(6, 8)}`
+    : "";
+  if (quoteDate !== isoDate) throw new Error("目前沒有當日盤中報價，請於交易日再試。");
+  const tradePrice = parsePrice(quote.trade?.z);
+  const price = tradePrice ?? parsePrice(quote.z);
+  const quoteTime = tradePrice === null ? quote.t : quote.trade?.t;
+  if (price === null || !/^\d{2}:\d{2}:\d{2}$/.test(quoteTime ?? "")) {
+    throw new Error("目前沒有可用的盤中成交價，請稍後再試。");
+  }
+
+  return { symbol, name: quote.n ?? symbol, price, quoteDate, quoteTime: quoteTime! } as const;
 }

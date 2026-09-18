@@ -96,7 +96,7 @@ export async function POST(request: Request) {
         costBasis,
         cash,
         asOfDate: asOfDateText,
-        message: "既有持股已匯入，持股市值與損益將依最近交易日收盤價自動計算。",
+        message: "既有持股已匯入，持股市值與損益將依資料庫中最近儲存的價格計算。",
       };
     });
 

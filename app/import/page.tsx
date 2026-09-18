@@ -119,8 +119,8 @@ export default function ImportPositionPage() {
 
           <div className="rounded-2xl border border-violet-400/20 bg-violet-400/10 p-5">
             <p className="text-xs font-bold tracking-wider text-violet-200/70">市值與損益</p>
-            <p className="mt-2 text-base font-bold text-white">匯入後將依資料庫中的最近收盤價計算</p>
-            <p className="mt-2 text-xs leading-5 text-slate-400">不需要手動輸入帳面價值；請在交易日收盤後，到儀表板手動更新 00631L 收盤價。</p>
+            <p className="mt-2 text-base font-bold text-white">匯入後將依資料庫中最近儲存的價格計算</p>
+            <p className="mt-2 text-xs leading-5 text-slate-400">不需要手動輸入帳面價值；請在交易日到儀表板手動取得 00631L 盤中成交價。</p>
           </div>
 
           {status && (

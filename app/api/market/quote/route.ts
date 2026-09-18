@@ -5,16 +5,17 @@ import { calculateNetMarketValue } from "@/lib/trading";
 import { connectToDatabase } from "@/lib/mongodb";
 import { fetchLatestTwseClosingPrice } from "@/lib/twseQuote";
 import { ExposureRecordModel } from "@/models/ExposureRecord";
-import { getStoredStockClosingPrice, upsertStockClosingPrice } from "@/models/StockClosingPrice";
+import { upsertStockClosingPrice } from "@/models/StockClosingPrice";
+import { getStoredMarketValuationPrice } from "@/models/MarketValuationPrice";
 
 const STOCK_CODE = "00631L";
 
-async function buildQuoteResponse(userId: string, quote: NonNullable<Awaited<ReturnType<typeof getStoredStockClosingPrice>>>) {
+async function buildQuoteResponse(userId: string, quote: NonNullable<Awaited<ReturnType<typeof getStoredMarketValuationPrice>>>) {
   const record = await ExposureRecordModel.findOne({ userId }).sort({ updatedAt: -1 });
   if (!record) return NextResponse.json({ error: "請先完成起始資金設定。" }, { status: 404 });
 
   const accounting = await getPositionAccounting(record, userId);
-  const valuation = calculateNetMarketValue(accounting.holdingShares * quote.close);
+  const valuation = calculateNetMarketValue(accounting.holdingShares * quote.price);
   const actualPortfolioValue = valuation.netMarketValue + accounting.cash;
   const unrealizedProfitLoss = valuation.netMarketValue - accounting.costBasis;
 
@@ -22,7 +23,6 @@ async function buildQuoteResponse(userId: string, quote: NonNullable<Awaited<Ret
     ...quote,
     symbol: quote.stockCode,
     name: quote.stockCode,
-    price: quote.close,
     priceSource: "database",
     holdingShares: accounting.holdingShares,
     grossMarketValue: valuation.grossMarketValue,
@@ -44,12 +44,12 @@ export async function GET() {
 
   try {
     await connectToDatabase();
-    const quote = await getStoredStockClosingPrice(STOCK_CODE);
-    if (!quote) return NextResponse.json({ error: "尚未儲存收盤價，請先手動更新。" }, { status: 404 });
+    const quote = await getStoredMarketValuationPrice(STOCK_CODE);
+    if (!quote) return NextResponse.json({ error: "尚未儲存價格，請先手動取得盤中價格。" }, { status: 404 });
     return await buildQuoteResponse(auth.user.id, quote);
   } catch (error) {
     console.error("Failed to read stored market quote", error);
-    return NextResponse.json({ error: "無法讀取已儲存的收盤價。" }, { status: 500 });
+    return NextResponse.json({ error: "無法讀取已儲存的價格。" }, { status: 500 });
   }
 }
 

@@ -4,7 +4,7 @@ import { readSession } from "@/lib/session";
 
 export const metadata: Metadata = {
   title: "看懂真正承擔的台股曝險",
-  description: "整合 00631L 持股、現金、交易費稅與最新收盤價，一眼掌握名目曝險比例、持股成本與整體損益。",
+  description: "整合 00631L 持股、現金、交易費稅與最近儲存的價格，一眼掌握名目曝險比例、持股成本與整體損益。",
 };
 
 const features = [
@@ -16,7 +16,7 @@ const features = [
 const steps = [
   ["01", "建立起始部位", "輸入既有 00631L 股數、持股成本與可用現金。"],
   ["02", "記錄每次買賣", "新增股數與成交價，系統同步更新成本、現金與持股。"],
-  ["03", "每天檢查曝險", "用最新可用收盤價重新估值，快速判斷是否需要調整部位。"],
+  ["03", "每天檢查曝險", "手動取得盤中成交價重新估值，快速判斷是否需要調整部位。"],
 ];
 
 export default async function LandingPage() {
@@ -38,7 +38,7 @@ export default async function LandingPage() {
               別只看損益，<br />看懂你真正承擔的
               <span className="mt-2 block bg-gradient-to-r from-teal-300 via-emerald-300 to-sky-300 bg-clip-text text-transparent">台股曝險。</span>
             </h1>
-            <p className="mt-6 max-w-xl text-base leading-8 text-slate-300 sm:text-lg">整合 00631L 持股、可用現金、交易費稅與最新收盤價，讓每一次加碼與減碼，都有清楚的風險依據。</p>
+            <p className="mt-6 max-w-xl text-base leading-8 text-slate-300 sm:text-lg">整合 00631L 持股、可用現金、交易費稅與最近儲存的價格，讓每一次加碼與減碼，都有清楚的風險依據。</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link href={primaryHref} className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-teal-300 px-6 py-3.5 text-sm font-black text-slate-950 shadow-[0_14px_40px_rgba(45,212,191,.2)] transition hover:-translate-y-0.5 hover:bg-teal-200">{primaryLabel}<span aria-hidden="true" className="transition group-hover:translate-x-1">→</span></Link>
               <Link href="#how-it-works" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/12 bg-white/[.04] px-6 py-3.5 text-sm font-bold text-white transition hover:border-white/25 hover:bg-white/[.08]">看看怎麼運作</Link>
@@ -55,7 +55,7 @@ export default async function LandingPage() {
 
       <section className="border-y border-white/[.07] bg-white/[.025] px-5 py-7 sm:px-8">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 text-center sm:grid-cols-3 sm:divide-x sm:divide-white/10">
-          <Stat value="2×" label="00631L 名目曝險估算" /><Stat value="一眼" label="現金、持股、損益同畫面" /><Stat value="每日" label="依最新可用收盤價更新" />
+          <Stat value="2×" label="00631L 名目曝險估算" /><Stat value="一眼" label="現金、持股、損益同畫面" /><Stat value="手動" label="取得盤中價後更新" />
         </div>
       </section>
 
@@ -92,7 +92,7 @@ export default async function LandingPage() {
 
 function DashboardPreview() {
   const ticks = Array.from({ length: 25 }, (_, index) => index);
-  return <div className="relative mx-auto w-full max-w-xl lg:mx-0"><div className="absolute -inset-8 -z-10 rounded-full bg-teal-400/10 blur-3xl" /><div className="overflow-hidden rounded-[1.7rem] border border-white/10 bg-slate-900/85 shadow-[0_30px_100px_rgba(0,0,0,.45)] backdrop-blur"><div className="flex items-center justify-between border-b border-white/[.07] px-5 py-4"><div><p className="text-[10px] font-black tracking-[.17em] text-teal-300">EXPOSURE DASHBOARD</p><p className="mt-1 text-sm font-bold text-white">00631L 部位總覽</p></div><span className="rounded-full bg-orange-300/10 px-3 py-1 text-[10px] font-bold text-orange-200 ring-1 ring-orange-300/20">高曝險</span></div><div className="grid gap-5 p-5 sm:grid-cols-[.9fr_1.1fr] sm:p-6"><div className="relative mx-auto aspect-square w-full max-w-[220px]"><div className="absolute inset-3 rounded-full border-[16px] border-slate-800" /><div className="absolute inset-3 rotate-45 rounded-full border-[16px] border-transparent border-r-orange-300 border-t-teal-300" />{ticks.map((tick) => <span key={tick} className="absolute left-1/2 top-1/2 h-[42%] w-px -translate-x-1/2 -translate-y-full origin-bottom" style={{ transform: `translate(-50%, -100%) rotate(${tick * 10.8 - 130}deg)` }}><i className="block h-1.5 w-px bg-slate-500" /></span>)}<div className="absolute inset-0 grid place-items-center text-center"><div><p className="text-3xl font-black tracking-tight text-white">146.8%</p><p className="mt-1 text-[8px] font-bold tracking-[.16em] text-slate-500">NOMINAL EXPOSURE</p></div></div></div><div className="grid grid-cols-2 gap-2.5 self-center"><PreviewMetric label="名目曝險" value="NT$ 1,284K" tone="teal" /><PreviewMetric label="持股市值" value="NT$ 642K" tone="sky" /><PreviewMetric label="可用現金" value="NT$ 233K" tone="slate" /><PreviewMetric label="總損益" value="+NT$ 48K" tone="emerald" /></div></div><div className="flex items-center justify-between border-t border-white/[.07] bg-black/10 px-5 py-3 text-[10px] text-slate-500"><span>示意數據</span><span>最新可用收盤價重新估值</span></div></div><div className="absolute -bottom-5 -left-3 rounded-xl border border-white/10 bg-slate-900 px-4 py-3 shadow-xl sm:-left-8"><p className="text-[9px] font-bold tracking-wider text-slate-500">風險先於報酬</p><p className="mt-1 text-xs font-bold text-teal-200">每次加碼都有依據</p></div></div>;
+  return <div className="relative mx-auto w-full max-w-xl lg:mx-0"><div className="absolute -inset-8 -z-10 rounded-full bg-teal-400/10 blur-3xl" /><div className="overflow-hidden rounded-[1.7rem] border border-white/10 bg-slate-900/85 shadow-[0_30px_100px_rgba(0,0,0,.45)] backdrop-blur"><div className="flex items-center justify-between border-b border-white/[.07] px-5 py-4"><div><p className="text-[10px] font-black tracking-[.17em] text-teal-300">EXPOSURE DASHBOARD</p><p className="mt-1 text-sm font-bold text-white">00631L 部位總覽</p></div><span className="rounded-full bg-orange-300/10 px-3 py-1 text-[10px] font-bold text-orange-200 ring-1 ring-orange-300/20">高曝險</span></div><div className="grid gap-5 p-5 sm:grid-cols-[.9fr_1.1fr] sm:p-6"><div className="relative mx-auto aspect-square w-full max-w-[220px]"><div className="absolute inset-3 rounded-full border-[16px] border-slate-800" /><div className="absolute inset-3 rotate-45 rounded-full border-[16px] border-transparent border-r-orange-300 border-t-teal-300" />{ticks.map((tick) => <span key={tick} className="absolute left-1/2 top-1/2 h-[42%] w-px -translate-x-1/2 -translate-y-full origin-bottom" style={{ transform: `translate(-50%, -100%) rotate(${tick * 10.8 - 130}deg)` }}><i className="block h-1.5 w-px bg-slate-500" /></span>)}<div className="absolute inset-0 grid place-items-center text-center"><div><p className="text-3xl font-black tracking-tight text-white">146.8%</p><p className="mt-1 text-[8px] font-bold tracking-[.16em] text-slate-500">NOMINAL EXPOSURE</p></div></div></div><div className="grid grid-cols-2 gap-2.5 self-center"><PreviewMetric label="名目曝險" value="NT$ 1,284K" tone="teal" /><PreviewMetric label="持股市值" value="NT$ 642K" tone="sky" /><PreviewMetric label="可用現金" value="NT$ 233K" tone="slate" /><PreviewMetric label="總損益" value="+NT$ 48K" tone="emerald" /></div></div><div className="flex items-center justify-between border-t border-white/[.07] bg-black/10 px-5 py-3 text-[10px] text-slate-500"><span>示意數據</span><span>最近儲存價格重新估值</span></div></div><div className="absolute -bottom-5 -left-3 rounded-xl border border-white/10 bg-slate-900 px-4 py-3 shadow-xl sm:-left-8"><p className="text-[9px] font-bold tracking-wider text-slate-500">風險先於報酬</p><p className="mt-1 text-xs font-bold text-teal-200">每次加碼都有依據</p></div></div>;
 }
 
 function PreviewMetric({ label, value, tone }: { label: string; value: string; tone: "teal" | "sky" | "slate" | "emerald" }) {
