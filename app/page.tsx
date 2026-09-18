@@ -25,8 +25,8 @@ export default async function LandingPage() {
   const primaryLabel = session ? "前往我的儀表板" : "登入並進入儀表板";
 
   return (
-    <main className="overflow-hidden bg-slate-950 text-slate-100">
-      <section className="relative isolate px-5 pb-20 pt-16 sm:px-8 sm:pt-24 lg:pb-28 lg:pt-28">
+    <main className="cosmic-home overflow-hidden bg-slate-950 text-slate-100">
+      <section className="cosmic-hero relative isolate px-5 pb-20 pt-16 sm:px-8 sm:pt-24 lg:pb-28 lg:pt-28">
         <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_12%_8%,rgba(45,212,191,.17),transparent_28%),radial-gradient(circle_at_85%_30%,rgba(249,115,22,.12),transparent_26%),linear-gradient(to_bottom,transparent,rgba(2,6,23,.9))]" />
         <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(rgba(148,163,184,.035)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,.035)_1px,transparent_1px)] bg-[size:52px_52px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
         <div className="mx-auto grid max-w-6xl items-center gap-14 lg:grid-cols-[1.02fr_.98fr] lg:gap-12">
@@ -49,7 +49,10 @@ export default async function LandingPage() {
               <span className="flex items-center gap-2"><CheckIcon />僅供試算與紀錄</span>
             </div>
           </div>
-          <DashboardPreview />
+          <div className="cosmic-visual">
+            <div className="cosmic-visual-art" aria-hidden="true" />
+            <DashboardPreview />
+          </div>
         </div>
       </section>
 

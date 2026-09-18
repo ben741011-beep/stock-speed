@@ -37,7 +37,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">
-        <div className="flex min-h-screen flex-col bg-slate-950 text-slate-100">
+        <div className="cosmic-shell flex min-h-screen flex-col text-slate-100">
           <SiteHeader
             authStatus={<Suspense fallback={null}><AuthStatus /></Suspense>}
             themeSelector={<ThemeSelector initialTheme={theme} />}

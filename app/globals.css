@@ -22,7 +22,7 @@ html[data-theme="light"] {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
 html[data-theme="light"] .bg-slate-950 {
@@ -128,4 +128,243 @@ html[data-theme="light"] .hover\:bg-white\/10:hover {
 
 html[data-theme="light"] .hover\:text-white:hover {
   color: #0f172a;
+}
+
+/* The warm horizon and blue light in the supplied artwork set the site palette. */
+:root {
+  --background: #0c0e10;
+  --foreground: #f8f4ed;
+  --color-slate-950: #0c0e10;
+  --color-slate-900: #191d20;
+  --color-slate-800: #2a3033;
+  --color-slate-700: #505b60;
+  --color-slate-500: #9aabb2;
+  --color-slate-400: #b0c0c7;
+  --color-slate-300: #d6e0e2;
+  --color-slate-200: #edf1ee;
+  --color-slate-100: #f8f4ed;
+  --color-teal-100: #ffe6c7;
+  --color-teal-200: #ffd4a8;
+  --color-teal-300: #ffbc83;
+  --color-teal-400: #ff9b66;
+  --color-emerald-200: #bdeaff;
+  --color-emerald-300: #8ddafa;
+  --color-emerald-400: #63c6ea;
+  --color-sky-200: #c5edff;
+  --color-sky-300: #98dcff;
+  --color-sky-400: #67c6f0;
+  --color-orange-100: #ffddc7;
+  --color-orange-200: #ffc4a1;
+  --color-orange-300: #ffa271;
+  --color-orange-400: #f88455;
+  --color-violet-200: #d4e9f5;
+  --color-violet-300: #a7d2e8;
+  --color-violet-400: #75b8d9;
+}
+
+html[data-theme="light"] {
+  --background: #f4f0e9;
+  --foreground: #242a2e;
+}
+
+.cosmic-shell {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--background);
+  background-image:
+    linear-gradient(105deg, #0c0e10 9%, rgb(12 14 16 / 94%) 46%, rgb(12 14 16 / 54%) 100%),
+    url("/orbit-light.png");
+  background-size: cover, min(72vw, 940px) auto;
+  background-position: center, right top 64px;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+html[data-theme="light"] .cosmic-shell {
+  background-image:
+    radial-gradient(circle at 85% 10%, rgb(119 206 232 / 12%), transparent 36%),
+    radial-gradient(circle at 12% 60%, rgb(255 168 114 / 9%), transparent 42%);
+}
+
+html[data-theme="dark"] .cosmic-shell :is(main, section)[class*="bg-slate-950"] {
+  background-color: transparent;
+}
+
+.cosmic-header {
+  position: relative;
+  z-index: 10;
+  border-color: rgb(255 214 176 / 13%);
+  box-shadow: 0 1px 30px rgb(0 0 0 / 16%);
+}
+
+html[data-theme="dark"] .cosmic-header {
+  background: rgb(12 14 16 / 78%);
+}
+
+.cosmic-logo {
+  background: linear-gradient(135deg, #ffd39d, #fa8555 72%);
+  box-shadow: 0 0 24px rgb(255 141 87 / 27%);
+}
+
+.cosmic-footer {
+  border-color: rgb(255 214 176 / 12%);
+}
+
+html[data-theme="dark"] .cosmic-footer {
+  background: rgb(12 14 16 / 88%);
+}
+
+.cosmic-shell :is(article, form, section)[class*="rounded-"][class*="border"] {
+  box-shadow: 0 24px 70px rgb(0 0 0 / 11%);
+}
+
+.cosmic-shell :is(input, select, textarea):focus-visible,
+.cosmic-shell :is(button, a):focus-visible {
+  outline: 2px solid var(--color-sky-300);
+  outline-offset: 3px;
+}
+
+.cosmic-home .cosmic-hero {
+  min-height: 690px;
+}
+
+.cosmic-home .cosmic-hero h1 {
+  text-shadow: 0 6px 40px rgb(0 0 0 / 38%);
+}
+
+.cosmic-home .cosmic-hero h1 span {
+  background-image: linear-gradient(92deg, #ffd2a1 4%, #ff9562 45%, #8ed9fa 95%);
+}
+
+.cosmic-visual {
+  position: relative;
+  display: grid;
+  min-height: 600px;
+  align-items: end;
+  padding-top: 170px;
+}
+
+.cosmic-visual-art {
+  position: absolute;
+  inset: 0 6% 30px 8%;
+  border: 1px solid rgb(255 201 149 / 22%);
+  border-radius: 30px;
+  background: url("/orbit-light.png") center 54% / cover no-repeat;
+  box-shadow: 0 36px 100px rgb(0 0 0 / 48%), 0 0 65px rgb(247 120 70 / 13%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 75%, transparent 100%);
+}
+
+.cosmic-visual > :last-child {
+  position: relative;
+  z-index: 1;
+  width: 92%;
+  margin-right: 0;
+}
+
+.cosmic-visual > :last-child > :nth-child(2) {
+  border-color: rgb(255 205 161 / 22%);
+  background: rgb(18 22 25 / 85%);
+  box-shadow: 0 28px 80px rgb(0 0 0 / 55%);
+}
+
+.cosmic-home #features article,
+.cosmic-home #how-it-works article {
+  border-color: rgb(255 211 165 / 13%);
+  background: linear-gradient(145deg, rgb(31 37 40 / 82%), rgb(17 20 22 / 85%));
+  backdrop-filter: blur(14px);
+}
+
+.cosmic-home #features article:hover,
+.cosmic-home #how-it-works article:hover {
+  border-color: rgb(255 184 126 / 37%);
+}
+
+html[data-theme="light"] .cosmic-hero h1,
+html[data-theme="light"] .cosmic-hero h1 + p {
+  color: #1d272d;
+  text-shadow: none;
+}
+
+html[data-theme="light"] .cosmic-home {
+  background: transparent;
+}
+
+html[data-theme="light"] .cosmic-hero {
+  background: radial-gradient(circle at 82% 12%, rgb(119 206 232 / 19%), transparent 39%),
+    radial-gradient(circle at 6% 70%, rgb(255 168 114 / 17%), transparent 42%);
+}
+
+html[data-theme="light"] .cosmic-hero > .pointer-events-none.absolute.inset-0 {
+  display: none;
+}
+
+html[data-theme="light"] .cosmic-hero h1 span {
+  background-image: linear-gradient(92deg, #a44d2d, #ce7044 52%, #176c8b);
+}
+
+html[data-theme="light"] .cosmic-visual > :last-child > :nth-child(2) {
+  background: rgb(255 255 255 / 92%);
+}
+
+html[data-theme="light"] .cosmic-home #features article,
+html[data-theme="light"] .cosmic-home #how-it-works article {
+  border-color: rgb(139 89 61 / 18%);
+  background: rgb(255 255 255 / 83%);
+}
+
+html[data-theme="light"] .text-teal-300,
+html[data-theme="light"] .text-teal-300\/70,
+html[data-theme="light"] .text-teal-200,
+html[data-theme="light"] .text-teal-100 {
+  color: #9b4f30;
+}
+
+html[data-theme="light"] .text-emerald-300,
+html[data-theme="light"] .text-emerald-300\/70,
+html[data-theme="light"] .text-emerald-200 {
+  color: #126687;
+}
+
+html[data-theme="light"] .text-sky-300,
+html[data-theme="light"] .text-sky-300\/70,
+html[data-theme="light"] .text-sky-200,
+html[data-theme="light"] .text-violet-300,
+html[data-theme="light"] .text-violet-200\/70,
+html[data-theme="light"] .text-violet-100\/80 {
+  color: #116180;
+}
+
+html[data-theme="light"] .text-orange-200 {
+  color: #994925;
+}
+
+@media (max-width: 1023px) {
+  .cosmic-visual {
+    min-height: 550px;
+  }
+}
+
+@media (max-width: 640px) {
+  .cosmic-shell {
+    background-size: cover, auto 90vh;
+    background-position: center, center top 60px;
+    background-attachment: scroll;
+  }
+
+  .cosmic-home .cosmic-hero {
+    min-height: 0;
+  }
+
+  .cosmic-visual {
+    min-height: 500px;
+    padding-top: 135px;
+  }
+
+  .cosmic-visual-art {
+    inset: 0 3% 20px;
+  }
+
+  .cosmic-visual > :last-child {
+    width: 94%;
+  }
 }
