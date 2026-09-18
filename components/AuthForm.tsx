@@ -1,13 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
 type AuthMode = "login" | "register";
 
 export function AuthForm({ mode }: { mode: AuthMode }) {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -31,8 +29,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         throw new Error(data.error ?? `${isLogin ? "登入" : "註冊"}失敗。`);
       }
 
-      router.replace("/dashboard");
-      router.refresh();
+      window.location.replace("/dashboard");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "目前無法完成操作，請稍後再試。");
     } finally {

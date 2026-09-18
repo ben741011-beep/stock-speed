@@ -21,8 +21,8 @@ const steps = [
 
 export default async function LandingPage() {
   const session = await readSession();
-  const primaryHref = session ? "/dashboard" : "/register";
-  const primaryLabel = session ? "前往我的儀表板" : "免費建立曝險儀表板";
+  const primaryHref = session ? "/dashboard" : "/login";
+  const primaryLabel = session ? "前往我的儀表板" : "登入並進入儀表板";
 
   return (
     <main className="overflow-hidden bg-slate-950 text-slate-100">
