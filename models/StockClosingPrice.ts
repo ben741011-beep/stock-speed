@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import type { InferSchemaType, Model, Types } from "mongoose";
+import { isDeepStrictEqual } from "node:util";
 
 const { model, models, Schema } = mongoose;
 
@@ -64,6 +65,21 @@ export const StockClosingPriceModel: Model<StockClosingPrice> =
   (models.StockClosingPrice as Model<StockClosingPrice>) ||
   model<StockClosingPrice>("StockClosingPrice", stockClosingPriceSchema);
 
+export async function assertStockClosingPriceSchema() {
+  const database = mongoose.connection.db;
+  if (!database) throw new Error("MongoDB 尚未連線。");
+  const info = (await database.listCollections({ name: STOCK_CLOSING_PRICE_COLLECTION }).toArray())[0];
+  if (!info) throw new Error("收盤價 collection 尚未完成設定。");
+  const options = "options" in info ? info.options : undefined;
+  const indexes = await database.collection(STOCK_CLOSING_PRICE_COLLECTION).indexes();
+  const codeIndex = indexes.find((index) => index.name === "stockCode_1");
+  if (!isDeepStrictEqual(options?.validator, STOCK_CLOSING_PRICE_VALIDATOR)
+    || options?.validationLevel !== "strict" || options?.validationAction !== "error"
+    || !codeIndex || !isDeepStrictEqual(codeIndex.key, { stockCode: 1 }) || codeIndex.unique !== true) {
+    throw new Error("收盤價 collection 的 validator 或索引不符合預期。");
+  }
+}
+
 function normalizeStockCode(stockCode: string) {
   const value = stockCode.trim().toUpperCase();
   if (!/^[0-9A-Z]{4,10}$/.test(value)) throw new Error("股票代碼格式不正確。");
@@ -105,17 +121,22 @@ export async function upsertStockClosingPrice(input: {
   close: number;
   quoteDate: string;
 }): Promise<StockClosingPriceWriteResult> {
+  await assertStockClosingPriceSchema();
   const stockCode = normalizeStockCode(input.stockCode);
   if (!Number.isFinite(input.close) || input.close <= 0) throw new Error("收盤價必須是大於 0 的數字。");
 
-  const existing = await StockClosingPriceModel.findOne({ stockCode }).select({ _id: 1 }).lean();
+  const quoteDate = parseQuoteDate(input.quoteDate);
+  const existing = await StockClosingPriceModel.findOne({ stockCode }).lean();
+  if (existing && existing.quoteDate >= quoteDate) {
+    return { quote: serializeStockClosingPrice(existing), matchedCount: 1, modifiedCount: 0, upsertedCount: 0 };
+  }
   const now = new Date();
   const result = await StockClosingPriceModel.updateOne(
     { stockCode },
     {
       $set: {
         close: input.close,
-        quoteDate: parseQuoteDate(input.quoteDate),
+        quoteDate,
         fetchedAt: now,
         updatedAt: now,
       },
