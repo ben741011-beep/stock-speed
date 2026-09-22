@@ -36,7 +36,7 @@ export default function ImportPositionPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "匯入失敗，請稍後再試。");
 
-      setStatus({ type: "success", message: data.message });
+      window.location.replace("/trade");
     } catch (reason) {
       setStatus({
         type: "error",
@@ -99,7 +99,7 @@ export default function ImportPositionPage() {
                   {calculatorOpen ? "收起計算機" : "開啟計算機"}
                 </button>
               </div>
-              <div className="flex items-center rounded-2xl border border-slate-700 bg-slate-950 px-4 focus-within:border-violet-400">
+              <div className="input-frame flex items-center rounded-2xl border border-slate-700 bg-slate-950 px-4 focus-within:border-violet-400">
                 <span className="text-slate-500">NT$</span>
                 <input id="available-cash" required type="number" min="0" step="any" value={cash} onChange={(event) => setCash(event.target.value)} className="w-full bg-transparent px-3 py-4 text-lg font-semibold outline-none" />
               </div>
@@ -155,7 +155,7 @@ function MoneyInput({
   return (
     <label>
       <span className="mb-2 block text-sm font-semibold text-slate-200">{label}</span>
-      <div className="flex items-center rounded-2xl border border-slate-700 bg-slate-950 px-4 focus-within:border-violet-400">
+      <div className="input-frame flex items-center rounded-2xl border border-slate-700 bg-slate-950 px-4 focus-within:border-violet-400">
         <span className="text-slate-500">NT$</span>
         <input required type="number" min="0" step="any" value={value} onChange={(event) => onChange(event.target.value)} className="w-full bg-transparent px-3 py-4 text-lg font-semibold outline-none" />
       </div>

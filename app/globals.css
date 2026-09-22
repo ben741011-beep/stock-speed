@@ -224,6 +224,15 @@ html[data-theme="dark"] .cosmic-footer {
   outline-offset: 3px;
 }
 
+.cosmic-shell .input-frame:focus-within {
+  outline: 2px solid var(--color-sky-300);
+  outline-offset: 3px;
+}
+
+.cosmic-shell .input-frame > input:focus-visible {
+  outline: none;
+}
+
 .cosmic-home .cosmic-hero {
   min-height: 690px;
 }

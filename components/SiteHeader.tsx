@@ -6,9 +6,11 @@ import type { ReactNode } from "react";
 
 export function SiteHeader({
   authStatus,
+  exposureSetupComplete,
   themeSelector,
 }: {
   authStatus: ReactNode;
+  exposureSetupComplete: boolean | null;
   themeSelector: ReactNode;
 }) {
   const pathname = usePathname();
@@ -29,9 +31,9 @@ export function SiteHeader({
           </nav>
         ) : !isAuthRoute && (
           <nav className="order-3 flex w-full min-w-0 items-center gap-1 text-sm font-semibold sm:order-none sm:w-auto sm:flex-1 sm:justify-end sm:gap-2 sm:overflow-x-auto">
-            <Link href="/dashboard" aria-current={pathname === "/dashboard" ? "page" : undefined} className={`flex-1 rounded-lg px-3 py-2 text-center transition sm:flex-none ${pathname === "/dashboard" ? "bg-teal-400 text-slate-950" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}>儀表板</Link>
-            <Link href="/setup" aria-current={isSetupRoute ? "page" : undefined} className={`flex-1 whitespace-nowrap rounded-lg px-3 py-2 text-center transition sm:flex-none ${isSetupRoute ? "bg-teal-400 text-slate-950" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}>起始設定</Link>
-            <Link href="/trade" aria-current={pathname === "/trade" ? "page" : undefined} className={`flex-1 rounded-lg px-3 py-2 text-center transition sm:flex-none ${pathname === "/trade" ? "bg-teal-400 text-slate-950" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}>買賣</Link>
+            <Link href="/dashboard" aria-current={pathname === "/dashboard" ? "page" : undefined} className={`flex-1 rounded-lg px-3 py-2 text-center transition sm:flex-none ${pathname === "/dashboard" ? "bg-teal-400 text-slate-950" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}>時速表</Link>
+            {exposureSetupComplete === false ? <Link href="/setup" aria-current={isSetupRoute ? "page" : undefined} className={`flex-1 whitespace-nowrap rounded-lg px-3 py-2 text-center transition sm:flex-none ${isSetupRoute ? "bg-teal-400 text-slate-950" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}>起始設定</Link> : null}
+            <Link href="/trade" aria-current={pathname === "/trade" ? "page" : undefined} className={`flex-1 whitespace-nowrap rounded-lg px-3 py-2 text-center transition sm:flex-none ${pathname === "/trade" ? "bg-teal-400 text-slate-950" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}>帳本管理</Link>
           </nav>
         )}
         <div className="flex shrink-0 items-center gap-2">

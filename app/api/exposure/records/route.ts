@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireApiSession } from "@/lib/auth-api";
 import { connectToDatabase } from "@/lib/mongodb";
-import { ExposureRecordModel } from "@/models/ExposureRecord";
+import { ExposureRecordModel, hasExposureRecord } from "@/models/ExposureRecord";
 
 type ExposureRequest = { investment?: unknown; cash?: unknown };
 type RiskLevel = "極低風險" | "偏低風險" | "普通風險" | "高風險" | "極高風險";
@@ -30,8 +30,11 @@ export async function POST(request: Request) {
   const level = getRiskLevel(exposureRatio);
   try {
     await connectToDatabase();
+    if (await hasExposureRecord(auth.user.id)) {
+      return NextResponse.json({ error: "起始設定已完成，之後請使用買賣功能。" }, { status: 409 });
+    }
     const record = await ExposureRecordModel.create({ userId: auth.user.id, source: "initial", realizedProfitLoss: 0, investment, holdingShares: 0, cash, portfolioValue, exposureNotional, exposureRatio, level });
-    return NextResponse.json({ id: record?.id, investment, cash, portfolioValue, exposureNotional, exposureRatio, level, message: "已更新起始資金設定。" }, { status: 201 });
+    return NextResponse.json({ id: record?.id, investment, cash, portfolioValue, exposureNotional, exposureRatio, level, message: "起始資金設定已完成。" }, { status: 201 });
   } catch (error) {
     console.error("Failed to save exposure record", error);
     return NextResponse.json({ error: "無法儲存暴險紀錄，請確認 MongoDB 連線設定。" }, { status: 500 });

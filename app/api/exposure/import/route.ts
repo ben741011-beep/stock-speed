@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireApiSession } from "@/lib/auth-api";
 import { connectToDatabase } from "@/lib/mongodb";
-import { ExposureRecordModel } from "@/models/ExposureRecord";
+import { ExposureRecordModel, hasExposureRecord } from "@/models/ExposureRecord";
 import { PositionImportRecordModel } from "@/models/PositionImportRecord";
 
 type ImportRequest = {
@@ -62,6 +62,9 @@ export async function POST(request: Request) {
   const level = getRiskLevel(exposureRatio);
 
   const database = await connectToDatabase();
+  if (await hasExposureRecord(auth.user.id)) {
+    return NextResponse.json({ error: "起始設定已完成，之後請使用買賣功能。" }, { status: 409 });
+  }
   const session = await database.startSession();
   try {
     let result: Record<string, unknown> | undefined;

@@ -6,7 +6,10 @@ import { AuthStatus } from "@/components/AuthStatus";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ThemeSelector } from "@/components/ThemeSelector";
+import { getCurrentUser } from "@/lib/auth";
+import { connectToDatabase } from "@/lib/mongodb";
 import { getTheme, THEME_COOKIE_NAME } from "@/lib/theme";
+import { hasExposureRecord } from "@/models/ExposureRecord";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,8 +30,24 @@ export const metadata: Metadata = {
   description: "整合 00631L 持股、現金與交易費稅，一眼掌握名目曝險、持股成本與整體損益。",
 };
 
+async function getExposureSetupStatus() {
+  try {
+    const user = await getCurrentUser();
+    if (!user) return null;
+
+    await connectToDatabase();
+    return hasExposureRecord(user.id);
+  } catch {
+    return null;
+  }
+}
+
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const theme = getTheme((await cookies()).get(THEME_COOKIE_NAME)?.value);
+  const [cookieStore, exposureSetupComplete] = await Promise.all([
+    cookies(),
+    getExposureSetupStatus(),
+  ]);
+  const theme = getTheme(cookieStore.get(THEME_COOKIE_NAME)?.value);
 
   return (
     <html
@@ -40,6 +59,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <div className="cosmic-shell flex min-h-screen flex-col text-slate-100">
           <SiteHeader
             authStatus={<Suspense fallback={null}><AuthStatus /></Suspense>}
+            exposureSetupComplete={exposureSetupComplete}
             themeSelector={<ThemeSelector initialTheme={theme} />}
           />
           <div className="flex-1">{children}</div>

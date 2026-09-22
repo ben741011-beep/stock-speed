@@ -1,5 +1,17 @@
 import mongoose from "mongoose";
 import type { InferSchemaType, Model } from "mongoose";
+import { getPositionAccounting } from "@/lib/positionAccounting";
+import {
+  calculateAdjustedImportStartingCash,
+  ExposureFundsUpdateError,
+  type ExposureFundsUpdateInput,
+} from "@/models/ExposureRecordFunds";
+import { PositionImportRecordModel } from "@/models/PositionImportRecord";
+
+export {
+  ExposureFundsUpdateError,
+  parseExposureFundsUpdate,
+} from "@/models/ExposureRecordFunds";
 
 const { model, models, Schema } = mongoose;
 
@@ -86,3 +98,116 @@ export type ExposureRecord = InferSchemaType<typeof exposureRecordSchema>;
 export const ExposureRecordModel: Model<ExposureRecord> =
   (models.ExposureRecord as Model<ExposureRecord>) ||
   model<ExposureRecord>("ExposureRecord", exposureRecordSchema);
+
+export async function hasExposureRecord(userId: string) {
+  return Boolean(await ExposureRecordModel.exists({ userId }));
+}
+
+function getRiskLevel(exposureRatio: number) {
+  if (exposureRatio <= 50) return "極低風險";
+  if (exposureRatio <= 80) return "偏低風險";
+  if (exposureRatio <= 120) return "普通風險";
+  if (exposureRatio <= 160) return "高風險";
+  return "極高風險";
+}
+
+export async function updateExposureFunds(userId: string, input: ExposureFundsUpdateInput) {
+  const session = await mongoose.startSession();
+  let recordId: mongoose.Types.ObjectId | null = null;
+  let matchedCount = 0;
+  let modifiedCount = 0;
+
+  try {
+    await session.withTransaction(async () => {
+      const record = await ExposureRecordModel.findOne({ userId })
+        .sort({ updatedAt: -1 })
+        .session(session);
+      if (!record) throw new ExposureFundsUpdateError("請先完成起始資金設定。", 404);
+
+      recordId = record._id;
+      const accounting = await getPositionAccounting(record, userId, session);
+      if (Math.abs(accounting.cash - input.cash) <= 0.000001) {
+        matchedCount = 1;
+        return;
+      }
+
+      if (record.source === "import") {
+        const importedPosition = await PositionImportRecordModel.findOne({
+          userId,
+          exposureRecordId: record._id,
+        }).sort({ createdAt: -1 }).session(session);
+        if (!importedPosition) {
+          throw new ExposureFundsUpdateError("找不到匯入帳本的起始資金資料，無法安全更新。", 409);
+        }
+
+        const adjustedStartingCash = calculateAdjustedImportStartingCash(
+          importedPosition.cash,
+          accounting.cash,
+          input.cash,
+        );
+        const importResult = await PositionImportRecordModel.updateOne(
+          {
+            _id: importedPosition._id,
+            userId,
+            cash: importedPosition.cash,
+            updatedAt: importedPosition.updatedAt,
+          },
+          { $set: { cash: adjustedStartingCash, updatedAt: new Date() } },
+          { runValidators: true, session },
+        );
+        if (importResult.matchedCount !== 1) {
+          throw new ExposureFundsUpdateError("資金已在其他頁面變更，請重新整理後再試。", 409);
+        }
+      }
+
+      const portfolioValue = accounting.costBasis + input.cash;
+      const exposureNotional = accounting.costBasis * 2;
+      const exposureRatio = portfolioValue > 0 ? (exposureNotional / portfolioValue) * 100 : 0;
+      const updateResult = await ExposureRecordModel.updateOne(
+        {
+          _id: record._id,
+          userId,
+          cash: record.cash,
+          updatedAt: record.updatedAt,
+        },
+        {
+          $set: {
+            cash: input.cash,
+            portfolioValue,
+            exposureNotional,
+            exposureRatio,
+            level: getRiskLevel(exposureRatio),
+            updatedAt: new Date(),
+          },
+        },
+        { runValidators: true, session },
+      );
+      matchedCount = updateResult.matchedCount;
+      modifiedCount = updateResult.modifiedCount;
+      if (updateResult.matchedCount !== 1) {
+        throw new ExposureFundsUpdateError("資金已在其他頁面變更，請重新整理後再試。", 409);
+      }
+    });
+  } finally {
+    await session.endSession();
+  }
+
+  const expectedRecordId = recordId as mongoose.Types.ObjectId | null;
+  if (!expectedRecordId) throw new Error("無法確認資金更新結果。");
+  const verified = await ExposureRecordModel.findOne({ _id: expectedRecordId, userId }).lean();
+  if (!verified) throw new Error("資金更新後找不到原帳本。");
+  const accounting = await getPositionAccounting(verified, userId);
+  if (Math.abs(accounting.cash - input.cash) > 0.000001) {
+    throw new Error("資金更新後查回驗證失敗。");
+  }
+
+  return {
+    recordId: expectedRecordId.toString(),
+    matchedCount,
+    modifiedCount,
+    cash: accounting.cash,
+    investment: accounting.costBasis,
+    holdingShares: accounting.holdingShares,
+    realizedProfitLoss: accounting.realizedProfitLoss,
+  };
+}
