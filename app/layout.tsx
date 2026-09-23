@@ -24,10 +24,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "00631L 曝險控制台",
-    template: "%s｜00631L 曝險控制台",
+    default: "台股曝險控制台",
+    template: "%s｜台股曝險控制台",
   },
-  description: "整合 00631L 持股、現金與交易費稅，一眼掌握名目曝險、持股成本與整體損益。",
+  description: "整合 00631L，或 0050 現貨與微型臺指期貨，一眼掌握淨資產、名目曝險、保證金水位與交易損益。",
 };
 
 async function getExposureSetupStatus() {

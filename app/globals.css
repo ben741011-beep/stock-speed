@@ -316,9 +316,20 @@ html[data-theme="light"] .cosmic-visual > :last-child > :nth-child(2) {
 }
 
 html[data-theme="light"] .cosmic-home #features article,
-html[data-theme="light"] .cosmic-home #how-it-works article {
+html[data-theme="light"] .cosmic-home #how-it-works article,
+html[data-theme="light"] .cosmic-home #models article {
   border-color: rgb(139 89 61 / 18%);
   background: rgb(255 255 255 / 83%);
+}
+
+html[data-theme="light"] .cosmic-home .landing-risk-panel {
+  border-color: rgb(139 89 61 / 18%);
+  background: rgb(255 255 255 / 86%);
+}
+
+html[data-theme="light"] .cosmic-home .landing-exposure-panel {
+  border-color: rgb(139 89 61 / 18%);
+  background: rgb(248 250 252 / 90%);
 }
 
 html[data-theme="light"] .text-teal-300,

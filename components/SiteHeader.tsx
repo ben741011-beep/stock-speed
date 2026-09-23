@@ -27,7 +27,7 @@ export function SiteHeader({
       <div className="mx-auto flex min-h-16 max-w-6xl flex-wrap items-center justify-between gap-x-3 gap-y-2 px-3 py-2 sm:flex-nowrap sm:px-8">
         <Link href="/" className="flex shrink-0 items-center gap-3">
           <span className="cosmic-logo grid size-9 place-items-center rounded-xl bg-teal-400 text-sm font-black text-slate-950">2×</span>
-          <span className="hidden lg:block"><span className="block text-xs font-bold tracking-[0.2em] text-teal-300">EXPOSURE CONTROL</span><span className="text-sm font-semibold text-white">00631L 曝險控制台</span></span>
+          <span className="hidden lg:block"><span className="block text-xs font-bold tracking-[0.2em] text-teal-300">EXPOSURE CONTROL</span><span className="text-sm font-semibold text-white">台股曝險控制台</span></span>
         </Link>
         {isLandingPage ? (
           <nav className="order-3 flex w-full items-center justify-center gap-1 text-sm font-semibold sm:order-none sm:w-auto sm:flex-1 sm:justify-end">
