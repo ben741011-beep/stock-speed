@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireApiSession } from "@/lib/auth-api";
+import { requireAppOwner } from "@/lib/app-owner-api";
 import { getPositionAccounting } from "@/lib/positionAccounting";
 import { calculateBrokerFee, calculateEtfSellTax } from "@/lib/trading";
 import { connectToDatabase } from "@/lib/mongodb";
@@ -23,7 +23,7 @@ function getRiskLevel(ratio: number): RiskLevel {
 }
 
 export async function GET(request: Request) {
-  const auth = await requireApiSession();
+  const auth = await requireAppOwner();
   if (auth.response) return auth.response;
 
   try {
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const auth = await requireApiSession();
+  const auth = await requireAppOwner();
   if (auth.response) return auth.response;
 
   let body: TradeRequest;

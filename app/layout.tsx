@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
-import { Suspense } from "react";
-import { AuthStatus } from "@/components/AuthStatus";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ThemeSelector } from "@/components/ThemeSelector";
-import { getCurrentUser } from "@/lib/auth";
+import { getAppOwner } from "@/lib/app-owner";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getTheme, THEME_COOKIE_NAME } from "@/lib/theme";
 import { hasExposureRecord } from "@/models/ExposureRecord";
@@ -32,8 +30,7 @@ export const metadata: Metadata = {
 
 async function getExposureSetupStatus() {
   try {
-    const user = await getCurrentUser();
-    if (!user) return null;
+    const user = await getAppOwner();
 
     await connectToDatabase();
     return hasExposureRecord(user.id);
@@ -58,7 +55,6 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full">
         <div className="cosmic-shell flex min-h-screen flex-col text-slate-100">
           <SiteHeader
-            authStatus={<Suspense fallback={null}><AuthStatus /></Suspense>}
             exposureSetupComplete={exposureSetupComplete}
             themeSelector={<ThemeSelector initialTheme={theme} />}
           />

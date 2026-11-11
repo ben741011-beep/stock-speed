@@ -1,13 +1,12 @@
 import "server-only";
 
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
+import { getAppOwner } from "@/lib/app-owner";
 import { connectToDatabase } from "@/lib/mongodb";
 import { hasExposureRecord } from "@/models/ExposureRecord";
 
 export async function requireAvailableExposureSetup() {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  const user = await getAppOwner();
 
   await connectToDatabase();
   if (await hasExposureRecord(user.id)) redirect("/trade");

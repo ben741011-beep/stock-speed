@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireApiSession } from "@/lib/auth-api";
+import { requireAppOwner } from "@/lib/app-owner-api";
 import { getPositionAccounting } from "@/lib/positionAccounting";
 import { connectToDatabase } from "@/lib/mongodb";
 import {
@@ -17,7 +17,7 @@ async function currentRecord(userId: string) {
 }
 
 export async function GET() {
-  const auth = await requireApiSession();
+  const auth = await requireAppOwner();
   if (auth.response) return auth.response;
 
   try {
@@ -39,7 +39,7 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
-  const auth = await requireApiSession();
+  const auth = await requireAppOwner();
   if (auth.response) return auth.response;
 
   try {

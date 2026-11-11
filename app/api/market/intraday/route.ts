@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { requireApiSession } from "@/lib/auth-api";
+import { requireAppOwner } from "@/lib/app-owner-api";
 import { fetchTwseIntradayPrice } from "@/lib/twseQuote";
 import { connectToDatabase } from "@/lib/mongodb";
 import { upsertStockIntradayPrice } from "@/models/StockIntradayPrice";
 
 export async function POST() {
-  const auth = await requireApiSession();
+  const auth = await requireAppOwner();
   if (auth.response) return auth.response;
 
   try {

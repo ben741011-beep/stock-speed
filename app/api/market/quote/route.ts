@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireApiSession } from "@/lib/auth-api";
+import { requireAppOwner } from "@/lib/app-owner-api";
 import { getPositionAccounting } from "@/lib/positionAccounting";
 import { calculateNetMarketValue } from "@/lib/trading";
 import { connectToDatabase } from "@/lib/mongodb";
@@ -39,7 +39,7 @@ async function buildQuoteResponse(userId: string, quote: NonNullable<Awaited<Ret
 }
 
 export async function GET() {
-  const auth = await requireApiSession();
+  const auth = await requireAppOwner();
   if (auth.response) return auth.response;
 
   try {
@@ -54,7 +54,7 @@ export async function GET() {
 }
 
 export async function POST() {
-  const auth = await requireApiSession();
+  const auth = await requireAppOwner();
   if (auth.response) return auth.response;
 
   try {

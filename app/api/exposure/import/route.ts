@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireApiSession } from "@/lib/auth-api";
+import { requireAppOwner } from "@/lib/app-owner-api";
 import { connectToDatabase } from "@/lib/mongodb";
 import { ExposureRecordModel, hasExposureRecord } from "@/models/ExposureRecord";
 import { PositionImportRecordModel } from "@/models/PositionImportRecord";
@@ -26,7 +26,7 @@ function getRiskLevel(exposureRatio: number): RiskLevel {
 }
 
 export async function POST(request: Request) {
-  const auth = await requireApiSession();
+  const auth = await requireAppOwner();
   if (auth.response) return auth.response;
 
   let body: ImportRequest;
